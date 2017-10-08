@@ -14,7 +14,7 @@ function INVALID_TTML(msg) {
 }
 */
 
-function getTemplate() {
+function getDocumentTemplate() {
   return {
     _declaration: {
       _attributes: {
@@ -29,90 +29,112 @@ function getTemplate() {
       },
       head: {
         metadata: {
-          _attributes: {
-            'xmlns:ttm': 'http://www.w3.org/ns/ttml#metadata'
-          }
-          // Insert here
+          // Insert metadata template here
         }
       },
       body: {
-        div: {
-          p: [
-            // and here
-          ]
-        }
+        div: [
+          // Insert language template here
+        ]
       }
     }
   };
 }
 
-function formalizeTime(time) {
-  if (typeof time === 'string') {
-    return time;
-  }
-  if (typeof time === 'number') {
-    return time + 's';
-  }
-  INVALID_OBJECT('start and end should be string or number');
+function getMetadataTemplate() {
+  return {
+    _attributes: {
+      'xmlns:ttm': 'http://www.w3.org/ns/ttml#metadata'
+    }
+  };
+}
+
+function getLauguageTemplate(language) {
+  return {
+    _attributes: {
+      'xml:lang': language
+    },
+    p: [
+      // Insert transcripts here
+    ]
+  };
 }
 
 function createLine(line) {
-  const start = formalizeTime(line.start);
-  const end = formalizeTime(line.end);
   return {
     _attributes: {
-      begin: start,
-      end
+      begin: line.start,
+      end: line.end
     },
     _text: line.text
   };
 }
 
-function preProcess(originalObj) {
-  const obj = getTemplate();
-  const metadataObj = obj.tt.head.metadata;
-  const lineList = obj.tt.body.div.p;
-  for (const key of Object.keys(originalObj)) {
-    if (key === 'lines') {
-      const lines = originalObj[key];
-      if (!lines.length) {
-        INVALID_OBJECT('No lines');
-      }
-      for (const line of lines) {
-        if (!line.start || !line.end) {
-          INVALID_OBJECT('Each line must have start and end time');
+// ttml format => xml-js format
+function preProcess(srcObj) {
+  const destDocumentObj = getDocumentTemplate();
+  let destMetadataObj;
+  for (const key of Object.keys(srcObj)) {
+    if (key === 'languages') {
+      const srcLangObj = srcObj[key];
+      const destLangList = destDocumentObj.tt.body.div;
+      for (const lang of Object.keys(srcLangObj)) {
+        const destLangObj = getLauguageTemplate(lang);
+        const destLines = destLangObj.p;
+        const srcLines = srcLangObj[lang].lines;
+        if (!srcLines || !srcLines.length) {
+          INVALID_OBJECT('No lines');
         }
-        lineList.push(createLine(line));
+        for (const line of srcLines) {
+          if (!line.start || !line.end) {
+            INVALID_OBJECT('Each line must have start and end time');
+          }
+          destLines.push(createLine(line));
+        }
+        destLangList.push(destLangObj);
       }
     } else {
-      const value = originalObj[key];
+      const value = srcObj[key];
       if (typeof value !== 'string') {
         INVALID_OBJECT('Metadata value should be a string');
       }
-      metadataObj[`ttm:${key}`] = {_text: value};
+      if (!destMetadataObj) {
+        destMetadataObj = getMetadataTemplate();
+      }
+      destMetadataObj[`ttm:${key}`] = {_text: value};
     }
   }
-  return obj;
+  if (destMetadataObj) {
+    destDocumentObj.tt.head.metadata = destMetadataObj;
+  }
+  return destDocumentObj;
 }
 
-function postProcess(originalObj) {
-  const lines = [];
-  const obj = {lines};
-  const metadataObj = originalObj.tt.head.metadata;
-  for (const key of Object.keys(metadataObj)) {
+// xml-js format => ttml format
+function postProcess(srcObj) {
+  const destObj = {};
+  // Copy metadata
+  const srcMetadataObj = srcObj.tt.head.metadata;
+  for (const key of Object.keys(srcMetadataObj)) {
     if (key.startsWith('ttm:')) {
-      obj[key.slice(4)] = metadataObj[key]._text;
+      destObj[key.slice(4)] = srcMetadataObj[key]._text;
     }
   }
-  const lineList = originalObj.tt.body.div.p;
-  for (const line of lineList) {
-    lines.push({
-      start: line._attributes.begin,
-      end: line._attributes.end,
-      text: line._text
-    });
+  // Copy language
+  const destLangObj = {};
+  for (const srcLangObj of srcObj.tt.body.div) {
+    const destLines = [];
+    for (const line of srcLangObj.p) {
+      destLines.push({
+        start: line._attributes.begin,
+        end: line._attributes.end,
+        text: line._text
+      });
+    }
+    destLangObj[srcLangObj._attributes['xml:lang']] = {lines: destLines};
   }
-  return obj;
+  destObj.languages = destLangObj;
+  return destObj;
 }
 
 function parse(ttmlStr) {
