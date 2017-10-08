@@ -11,12 +11,21 @@ fixtures.forEach(({name, ttml, object}) => {
 
 function deepEqual(t, expected, actual) {
   t.deepEqual(expected, actual);
-  const expectedLines = expected.lines;
-  const actualLines = actual.lines;
-  if (!actualLines || actualLines.length !== expectedLines.length) {
+  const expectedLanguages = expected.languages;
+  const actualLanguages = actual.languages;
+  if (!actualLanguages || Object.keys(actualLanguages).length !== Object.keys(expectedLanguages).length) {
     t.fail();
   }
-  for (let i = 0; i < actualLines.length; i++) {
-    t.deepEqual(expectedLines[i], actualLines[i]);
+  for (const key of Object.keys(expectedLanguages)) {
+    const expectedLang = expectedLanguages[key];
+    const actualLang = actualLanguages[key];
+    if (!actualLang || !actualLang.lines || actualLang.lines.length !== expectedLang.lines.length) {
+      t.fail();
+    }
+    const expectedLines = expectedLang.lines;
+    const actualLines = actualLang.lines;
+    for (let i = 0; i < expectedLines.length; i++) {
+      t.deepEqual(expectedLines[i], actualLines[i]);
+    }
   }
 }
