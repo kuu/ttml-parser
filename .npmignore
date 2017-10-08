@@ -58,3 +58,7 @@ typings/
 .env
 
 package-lock.json
+test
+.node-version
+.travis.yml
+.npmignore

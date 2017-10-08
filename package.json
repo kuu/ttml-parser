@@ -1,0 +1,50 @@
+{
+  "name": "ttml",
+  "version": "0.0.1",
+  "description": "A simple library to read/write TTML",
+  "main": "index.js",
+  "scripts": {
+    "lint": "xo",
+    "test": "npm run lint && ava --verbose"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kuu/ttml-parser.git"
+  },
+  "keywords": [
+    "TTML",
+    "Subtitles",
+    "Closed-Captions"
+  ],
+  "author": "Kuu Miyazaki",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kuu/ttml-parser/issues"
+  },
+  "homepage": "https://github.com/kuu/ttml-parser#readme",
+  "dependencies": {
+    "xml-js": "^1.5.1"
+  },
+  "devDependencies": {
+    "ava": "^0.22.0",
+    "xo": "^0.18.2"
+  },
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "xo": {
+    "esnext": true,
+    "space": true,
+    "rules": {
+      "capitalized-comments": 0,
+      "dot-notation": 0,
+      "new-cap": 0,
+      "no-cond-assign": 0,
+      "no-mixed-operators": 0,
+      "no-multi-assign": 0,
+      "import/no-dynamic-require": 0,
+      "unicorn/explicit-length-check": 0,
+      "unicorn/filename-case": 0
+    }
+  }
+}
