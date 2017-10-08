@@ -1,3 +1,7 @@
+[![NPM](https://nodei.co/npm/ttml.png?mini=true)](https://nodei.co/npm/ttml/)
+[![Build Status](https://travis-ci.org/kuu/ttml-parser.svg?branch=master)](https://travis-ci.org/kuu/ttml-parser)
+[![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/sindresorhus/xo)
+
 # ttml-parser
 A simple library to read/write [TTML](https://w3c.github.io/ttml2/spec/ttml2.html)
 
@@ -49,6 +53,9 @@ into the following XML text:
 ```
 
 and vice versa.
+
+## Install
+[![NPM](https://nodei.co/npm/ttml.png?mini=true)](https://nodei.co/npm/ttml/)
 
 ## Usage
 ```js
